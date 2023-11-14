@@ -132,9 +132,6 @@
 %                   'random': uses random integers for shape, rate and scaling
 %                   to find the lowest cost for a parameter set with a PDF with
 %                   the search window.
-%                   'random2': experimental(!) version of 'random' for small
-%                   data samples, using more plausible ranges of random values
-%                   and usually less iterations.
 %   psMaxIt         - [numeric {integer}] Maximum iterations for the pre-search
 %                   optimization function (used for the random pre-search types,
 %                   ignored for the close-form search). Must be a positive value
@@ -156,7 +153,7 @@
 %
 %% See also
 %   GmaResults, nnegIntervals, grnma, gammaPdf,
-%   presearch_random, presearch_random2, presearch_closeform, meeseeks
+%   presearch_random, presearch_closeform, meeseeks
 
 %% Attribution
 %	Last author: Olaf C. Schmidtmann, last edit: 24.08.2023
@@ -190,7 +187,7 @@ function [result, x0, argsUsed] = gmaFit(data, winStart, winLength, args)
         args.logSrc(1, 1) logical = false
         args.logFn(1, 1) {mustBeA(args.logFn, 'function_handle')}
         args.costFn(1, 1) {mustBeA(args.costFn, 'function_handle')} = @meeseeks
-        args.psType{mustBeMember(args.psType, {'random', 'random2', 'closeform'})} = 'closeform'
+        args.psType{mustBeMember(args.psType, {'random', 'closeform'})} = 'closeform'
         args.psMaxIt(1, 1) {mustBeInteger} = 0
         args.psRespectWin(1, 1) logical = true
         args.xtol(1, 1) {mustBeInRange(args.xtol, 2.2204e-16, 1)} = 1e-8
@@ -327,9 +324,6 @@ function [result, x0, argsUsed] = gmaFit(data, winStart, winLength, args)
     if strcmp(args.psType, 'random')
         % pre-search minimizing MSE using random parameters
         x0 = presearch_random(costFn, preMwin, imax = args.psMaxIt);
-    elseif strcmp(args.psType, 'random2')
-        % pre-search minimizing MSE using optimized random parameters
-        x0 = presearch_random2(costFn, preMwin, imax = args.psMaxIt);
     else
         % pre-search using closed-form estimators within rel. search window
         x0 = presearch_closeform(dataSeg, 2, preMwin);
