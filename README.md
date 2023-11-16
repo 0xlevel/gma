@@ -7,8 +7,8 @@ GMA was developed in the [Department of Individual Differences and Psychological
 
 ## Prerequisites
 
-- **MATLAB** (R2023a; likely supported from R2017a or higher)
-- _(optional)_ Statistics and Machine Learning Toolbox to obtain median and iqr, which rely on the gaminv function.
+- **MATLAB** (R2023a (v9.14); likely supported by R2017a or higher)
+- _(optional)_ Statistics and Machine Learning Toolbox (built with v12.5) to obtain median and iqr, which rely on the gaminv function.
 - _(recommended)_ EEGLAB Toolbox to (pre-)process and structure EEG data
 
 ## Installation
