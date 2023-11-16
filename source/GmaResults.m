@@ -125,7 +125,7 @@
 %   GammaDist, gmaFit
 
 %% Attribution
-%	Last author: Olaf C. Schmidtmann, last edit: 06.07.2023
+%	Last author: Olaf C. Schmidtmann, last edit: 15.11.2023
 %   Code adapted from the original version by André Mattes and Kilian Kummer.
 %   Source: https://github.com/0xlevel/gma
 %	MATLAB version: 2023a
@@ -206,12 +206,12 @@ classdef GmaResults < GammaDist
 
     properties (Constant)
         % Version number (Major.Minor.Patch) of GmaResults.
-        REL_VERSION = '0.9.2';
+        REL_VERSION = '0.9.5';
         % Release date of this version (yyyy-mm-dd)
-        REL_DATE = '2023-06-29';
+        REL_DATE = '2023-11-16';
         % Identificator for the type field in the info struct.
         EEG_INFO_TYPE = 'GmaInfo';
-        % Minium points for segments (esp. for correlations)
+        % Minium points for segments (especially for correlations)
         MIN_PTNS = 3;
     end
 
@@ -499,8 +499,12 @@ classdef GmaResults < GammaDist
             info = GmaResults.emptyEegInfo;
             info.setname = EEG.setname;
             info.srate = EEG.srate;
-            % Set xmin (the origin, i.e. the data point at t=0)
-            info.xmin = 0;
+            % Set xmin (the time at the first data point in milliseconds)
+            if isfield(EEG, 'xmin')
+                info.xmin = EEG.xmin;
+            else
+                info.xmin = 0;
+            end
 
             % Store a preliminary label
             chLoc = struct;
@@ -1107,7 +1111,7 @@ classdef GmaResults < GammaDist
                 case 'mean'
                     e = sqrt(obj.mse) / mean(obsData);
                 case 'range'
-                    e = sqrt(obj.mse) / range(obsData);
+                    e = sqrt(obj.mse) / vrange(obsData);
                 case 'iqr'
                     e = sqrt(obj.mse) / obj.iqr;
                 case 'gamsd'

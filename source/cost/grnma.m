@@ -74,7 +74,7 @@
 % eps
 
 %% Attribution
-%	Last author: Olaf C. Schmidtmann, last edit: 27.06.2023
+%	Last author: Olaf C. Schmidtmann, last edit: 16.11.2023
 %   Code adapted (2022) from the original version by Árpád Bűrmen from 2011
 %   (source: https://fides.fe.uni-lj.si/~arpadb/software-grnm.html), GPLv2.1.
 %   Source: https://github.com/0xlevel/gma
@@ -489,7 +489,7 @@ function [cost, fit, exitFlag, niter] = grnma(costFn, x0, maxiter, args)
         logger("Optimization successful. Optimization criteria satisfied.");
     end
     logger("Iterations: %i/%i cost function, %i/%i algorithm.", ...
-        fniter, args.maxfniter, niter, maxiter);
+        fniter, args.maxfniter, niter - 1, maxiter);
 
 end
 

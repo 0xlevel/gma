@@ -1,10 +1,8 @@
-%plotGma Plots GMA results (GmaResults)
+%plotGmaResults Plots GMA results (GmaResults)
 %
 %% Syntax
 %   % Fit EEG data and invert it to find negative components.
 %   fit = gmaFitEeg(EEG, eegChannel, 50, 100, invData = 1);
-%   % The data was inverted, thus invData = true:
-%   plotGmaResults(fit, xline = 51, xlineLabel = {'Response'});
 %
 %% Description
 %   The function plots the content of GmaResults for data of a single channel
@@ -42,22 +40,18 @@
 %               (default), the desc field in 'eegInfo' will be used, instead.
 %   yrev        [logical] true (default) reverses y-axis (negative is up) for
 %               the data plot
-%   xorigin     - [double] The origin offset of the x-axis in data points sets
-%               the time of zero within the data and adjusts all times
-%               accordingly. The default of 0, will either set the orgin to the
-%               data point, converted from ms in the field 'xmin' of eegInfo or
-%               to 1, if 'xmin' is not present.
+%   xorigin     - [double] The origin of the x-axis, asthe data point at time 
+%               zero, used for all time adjustments.
+%               The default of 0, will either use the field 'xmin' of the 
+%               property eegInfo in the results if present (it contains the 
+%               relative time of the first data point in seconds) to set the 
+%               origin or set it to 1, otherwise.
 %   ticksMs     - [double {integer}] Desired tick spacing in milliseconds.
 %               Default: 50
 %   srate       - [double {integer}] The sampling rate of the data used for
 %               conversions. The parameter will only be used, if eegInfo does
 %               not contain the field 'srate', which overrides this setting.
 %               Otherwise defaults to 1000.
-%   xline       - [double {integer}] Add vertical lines as array, which can be
-%               labeled, using xlineLabel.
-%   xlineLabel  - [char cell] Cell array of texts to be used as label for
-%               vertical lines as provided by xline (e.g., e.g., {'Stimulus',
-%               'Onset'}).
 %   xlim        [double] Limits of the x-axis of the plot as two-element vector.
 %               Default: [NaN, NaN]
 %   data        - [double] Vector of data to plot. If left empty (default), the
@@ -70,7 +64,7 @@
 %   GmaResults, gmaFit, gmaFitEeg
 
 %% Attribution
-%	Last author: Olaf C. Schmidtmann, last edit: 13.11.2023
+%	Last author: Olaf C. Schmidtmann, last edit: 16.11.2023
 %   Code adapted from the original version by André Mattes and Kilian Kummer.
 %   Source: https://github.com/0xlevel/gma
 %	MATLAB version: 2023a
@@ -97,8 +91,6 @@ function plotGmaResults(results, args)
         args.xorigin(1, 1) = 0;
         args.ticksMs(1, 1) = 50;
         args.srate(1, 1) = 1000;
-        args.xline(1, :) {mustBeInteger} = []
-        args.xlineLabel(1, :) {mustBeText} = ''
         args.xlim(1, 2) double = [NaN, NaN]
         args.data(1, :) double = []
         args.plotTails(1, 1) logical = true
@@ -206,7 +198,6 @@ function plotGmaResults(results, args)
     ax = gca;
     dataColor = [0.8500, 0.3250, 0.0980];
     ax.YColor = dataColor;
-    %ylabel('Channel \muV', 'Color', dataColor);
     ylabel('\muV', 'fontsize', 12, 'Color', dataColor);
 
     dx = 1:nData;
@@ -219,18 +210,19 @@ function plotGmaResults(results, args)
             args.xlim = [round(dx(1), 2), round(dx(end))];
         end
     end
-
+    
     [l1, u1] = bounds([chData(:, args.xlim(1) + 1:args.xlim(2)), results.y]);
     maxLim = max(abs([l1, u1]));
     % Slightly increase the limits beyond the bounds to display curves properly.
     yBounds = [min(-0.1, -maxLim), max(0.1, maxLim)] * 1.1;
 
-    % include the last point
-    xlim(args.xlim + [0, 1]);
+    % display the last tick
+    args.xlim = args.xlim + [0, 1];
+
+    xlim(args.xlim);
     ylim(yBounds);
 
     if dataInverted && args.yrev, ax.YDir = "reverse"; end
-    % ax.YColor = ppData.Color;
 
     %% Plot PDF axis / GMA fit
     yyaxis left;
@@ -337,11 +329,15 @@ function plotGmaResults(results, args)
     tickDist = args.ticksMs / ratef;
     % Set ticks before and after the origin and include the outer values
     ticks = (tickDist:tickDist:dx(end) + 1) + 1;
+
+    if args.xorigin == 1
+        ticks = [dx(1), ticks];
+    end
+    
     xticks(ticks);
 
     xticklabels(round((ticks - args.xorigin) * ratef));
     xlabel('Time (ms)', 'fontsize', 12);
-    % grid on;
 
     % Legend
     ldg = legend(AutoUpdate = 'off');

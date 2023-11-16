@@ -39,9 +39,9 @@
 %
 %   [Optional] Name-value parameters
 %   sgolayWin   - [numeric {integer}] Window size for the Savitzky-Golay filter 
-%               to smooth the data before estimating the scaling. Default = 10
-%               (default). Use 0 to disable the filter.
-%
+%               to smooth the data before estimating the scaling. Default = 10. 
+%               Use 0 to disable the filter.
+%               
 %% Output
 %   estPdf      - [double] Estimated Gamma PDF parameters in a 3-column vector:
 %               1: Gamma shape parameter
@@ -63,7 +63,7 @@
 %   gammaEstCf, smoothdata
 
 %% Attribution
-%	Last author: Olaf C. Schmidtmann, last edit: 27.06.2023
+%	Last author: Olaf C. Schmidtmann, last edit: 14.11.2023
 %   Code adapted from the original version by André Mattes and Kilian Kummer.
 %   Source: https://github.com/0xlevel/gma
 %	MATLAB version: 2023a
@@ -104,10 +104,6 @@ function estGuess = presearch_closeform(data, precision, modeWin, args)
         modeWin = [1, numel(data)];
     end
 
-    if args.sgolayWin
-        args.sgolayWin = min(round(args.sgolayWin), range(modeWin) + 1);
-    end
-
     [shape, rate] = gammaEstCf(data, 1, precision);
     yscale = 1;
 
@@ -125,13 +121,14 @@ function estGuess = presearch_closeform(data, precision, modeWin, args)
         gy = gammaPdf([1, estMode, length(data)], shape, rate);
         smData = data;
         if args.sgolayWin
+            args.sgolayWin = min(round(args.sgolayWin), range(modeWin) + 1);
             try
                 smData = smoothdata(data, "sgolay", args.sgolayWin);
             catch
                 warning("Smoothing the data failed. Using unchanged data.");
             end
         end
-        yscale = round(range(smData) / range(gy), 4);
+        yscale = round(vrange(smData) / vrange(gy), 4);
     end
 
     estGuess = [shape; rate; yscale];

@@ -8,9 +8,9 @@
 %   [fitResult, initialGuess, argsUsed] = gmaFit(channelData);
 %
 %% Description
-%   Fits an initial guess of a Gamma probability density function on the 
-%   nonnegative interval (NNI) with the largest area under the curve found in 
-%   the data and optimizes the fit using Grid Restrained Nelder-Mead Algoritm 
+%   Fits an initial guess of a Gamma probability density function on the
+%   nonnegative interval (NNI) with the largest area under the curve found in
+%   the data and optimizes the fit using Grid Restrained Nelder-Mead Algoritm
 %   (GRNMA).
 %
 %   GMA was developed by Kummer et al. (2020) to investigate empirical
@@ -21,13 +21,13 @@
 %   This function works in multiple steps, given a data vector and time window
 %   for a valid mode of a potential PDF, which could be fitted on it.
 %   The default steps run as follows if each is successful:
-%   1.  Find a nonnegative interval (NNI) with thw largest area under the curve 
-%       and a minimum length 20 data points (see <a href="matlab:help('nnegIntervals')">nnegIntervals</a>), which intersects 
+%   1.  Find a nonnegative interval (NNI) with thw largest area under the curve
+%       and a minimum length 20 data points (see <a href="matlab:help('nnegIntervals')">nnegIntervals</a>), which intersects
 %       the time window with at least 50% of its width.
 %   2.  Add zeros before the first point of the NNI up to the first index in
 %       the data (e.g. for an NNI of [10, 55] nine zeros would be inserted).
 %   3.  The parameters of a Gamma PDF will be estimated for the zero padded
-%       NNI, using close-form estimation (Ye & Chen, 2017, see <a href="matlab:help('presearch_closeform')">presearch_closeform</a>). 
+%       NNI, using close-form estimation (Ye & Chen, 2017, see <a href="matlab:help('presearch_closeform')">presearch_closeform</a>).
 %       The PDF mode must be within the time window.
 %   4.  This initial fit will be optimized, using the Grid Restrained
 %       Nelder-Mead Algorithm (Bűrmen et al., 2006, see <a href="matlab:help('grnma')">grnma</a>).
@@ -83,9 +83,9 @@
 %                   equal than winStart to pass as successful.
 %
 %   [Optional] Name-value parameters
-%   invData         - [logical] true: indicates that the data' polarity was 
-%                   inverted (data * -1) before entering this function; 
-%                   false (default): the data passed was not inverted. 
+%   invData         - [logical] true: indicates that the data' polarity was
+%                   inverted (data * -1) before entering this function;
+%                   false (default): the data passed was not inverted.
 %                   This flag is purely informative, included in the results.
 %   optimizeFull    - [logical] Sets the scope ot the GRNMA optmization to
 %                   either the largest nonnegative interval with false (default)
@@ -136,7 +136,6 @@
 %                   optimization function (used for the random pre-search types,
 %                   ignored for the close-form search). Must be a positive value
 %                   or 0 to use a pre-search's default (default = 0).
-%   psRespectWin    - [logical] default: true
 %   xtol            - [double] lower boundary for the absolute tolerance of
 %                   differences for each step in the data, as used in the GRNMA.
 %                   For more details, please consult the <a href="matlab:help('grnma')">grnma</a> help. (default =
@@ -156,7 +155,7 @@
 %   presearch_random, presearch_closeform, meeseeks
 
 %% Attribution
-%	Last author: Olaf C. Schmidtmann, last edit: 24.08.2023
+%	Last author: Olaf C. Schmidtmann, last edit: 15.11.2023
 %   Code adapted from the original version by André Mattes and Kilian Kummer.
 %   Source: https://github.com/0xlevel/gma
 %	MATLAB version: 2023a
@@ -166,7 +165,7 @@
 %   it under the terms of the GNU General Public License as published by
 %   the Free Software Foundation, either version 3 of the License, or
 %   (at your option) any later version.
-% 
+%
 %   This program is distributed in the hope that it will be useful,
 %   but WITHOUT ANY WARRANTY; without even the implied warranty of
 %   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -189,7 +188,6 @@ function [result, x0, argsUsed] = gmaFit(data, winStart, winLength, args)
         args.costFn(1, 1) {mustBeA(args.costFn, 'function_handle')} = @meeseeks
         args.psType{mustBeMember(args.psType, {'random', 'closeform'})} = 'closeform'
         args.psMaxIt(1, 1) {mustBeInteger} = 0
-        args.psRespectWin(1, 1) logical = true
         args.xtol(1, 1) {mustBeInRange(args.xtol, 2.2204e-16, 1)} = 1e-8
         args.ftol(1, 1) {mustBeInRange(args.ftol, 2.2204e-16, 1)} = 1e-8
     end
@@ -238,7 +236,7 @@ function [result, x0, argsUsed] = gmaFit(data, winStart, winLength, args)
         winLength = maxWin;
     end
     % mode window
-    mWin = [winStart, winStart + winLength - 1];
+    mWin = [winStart, winStart + winLength];
 
     % Check the cost function and if ok, insert the nonnegative interval
     if nargin(args.costFn) ~= 2
@@ -314,12 +312,7 @@ function [result, x0, argsUsed] = gmaFit(data, winStart, winLength, args)
 
     logger('Start - Pre-Search');
 
-    if args.psRespectWin
-        preMwin = mWin - x0seg(1) + xsegPre;
-    else
-        preMwin = [1, numel(dataSeg)];
-    end
-
+    preMwin = mWin - x0seg(1) + xsegPre + 1;
 
     if strcmp(args.psType, 'random')
         % pre-search minimizing MSE using random parameters
@@ -373,9 +366,9 @@ function [result, x0, argsUsed] = gmaFit(data, winStart, winLength, args)
 end
 
 function [iv, msg] = maxAreaInterval(data, win, minLength)
-    %maxAreaInterval Nonnegative interval with the largest area under the curve 
+    %maxAreaInterval Nonnegative interval with the largest area under the curve
     %
-    %   Returns the closed nonnegative interval (y >= 0) of a data vector, which 
+    %   Returns the closed nonnegative interval (y >= 0) of a data vector, which
     %   1) has at least the minimum length,
     %   2) has its center within a search window of indices (overlaps min. 50%),
     %   3) and has the largest area under the curve (sum of all data values in
@@ -383,47 +376,42 @@ function [iv, msg] = maxAreaInterval(data, win, minLength)
     %   The returned interval will be returned in full, even if it starts or
     %   ends outside the search window.
     %
-    % See also: 
+    % See also:
     %   nnegIntervals
 
     arguments
-        data (1, :)
+        data(1, :)
         win = [1, numel(data)]
         minLength = 1
     end
 
+    win = [max(win(1), 1), min(win(2), numel(data))];
     iv = [];
 
-    % Get closed intervals of nonnegative values.
-    [nnegIv, closed] = nnegIntervals(data, true);
+    % Get intervals of nonnegative values.
+    nnegIv = nnegIntervals(data, true);
 
     if isempty(nnegIv)
-        msg = "No nonnegative intervals or only flat areas found in the data.";
+        msg = "No nonnegative intervals found in the data.";
         return;
     end
 
     % All intervals intersecting the window
     winIntersect = win(2) > nnegIv(1, :) & win(1) < nnegIv(2, :);
     ivWin = nnegIv(:, winIntersect);
-    closed = closed(winIntersect);
 
-    % Restrict open intervals to the window
-    [ivWin(:, ~closed)] = [max(ivWin(1, ~closed), win(1)); ...
-        min(ivWin(2, ~closed), win(2))];
-    
     % Remove anything below the minimum length
     ivSizes = diff(ivWin) + 1;
     ivWin = ivWin(:, ivSizes >= minLength);
-    
-    % Only keep intervals, which either overlap with at least 50% of their size
+
+    % Only keep intervals, which have their center inside the window
     ivCenter = round(sum(ivWin) * 0.5);
     centerInside = win(2) > ivCenter & win(1) < ivCenter;
     % or occupy at least 50% of the window
     ivWinInside = [max(ivWin(1, :), win(1)); min(ivWin(2, :), win(2))];
     ivSizeInside = diff(ivWinInside) + 1 >= diff(win) * 0.5;
-    ivWin = ivWin(:, centerInside | ivSizeInside);
-
-    % or keep it, if there is only one interval?
+    keepIv = centerInside | ivSizeInside;
+    ivWin = ivWin(:, keepIv);
 
     if isempty(ivWin)
         msg = sprintf("No nonnegative intervals of sufficient length (%i " + ...
@@ -432,14 +420,23 @@ function [iv, msg] = maxAreaInterval(data, win, minLength)
         return;
     end
 
-    % Calculate area under the curve and pick the largest as result
     nIv = size(ivWin, 2);
-    ivArea = zeros(1, nIv);
-    for i = 1:nIv
-        ivArea(i) = sum(data(ivWin(1, i):ivWin(2, i)));
+
+    if nIv == 1
+        maxIdx = 1;
+    else
+
+        % Calculate area under the curve within the window and pick the largest
+        ivArea = zeros(1, nIv);
+        ivWinInside = ivWinInside(:, keepIv);
+
+        for i = 1:nIv
+            ivArea(i) = sum(data(ivWinInside(1, i):ivWinInside(2, i)));
+        end
+
+        [~, maxIdx] = max(ivArea);
     end
-    
-    [~, maxIdx] = max(ivArea);
+
     iv = ivWin(:, maxIdx);
     msg = sprintf("Nonnegative interval found at [%i, %i].", iv');
 end

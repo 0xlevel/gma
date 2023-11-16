@@ -64,7 +64,7 @@
 %   [estShape_hp, estRate_hp] = gammaEstCf(ggpdf, 1, 4)
 
 %% Attribution
-%	Last author: Olaf C. Schmidtmann, last edit: 26.06.2023
+%	Last author: Olaf C. Schmidtmann, last edit: 13.11.2023
 %   Source: https://github.com/0xlevel/gma
 %	MATLAB version: 2023a
 %
@@ -84,7 +84,7 @@ function [shape, rate] = gammaEstCf(y, corrected, precision)
     else, precision = max(1, precision); end
     if nargin < 2, corrected = true; end
 
-    yr = range(y);
+    yr = vrange(y);
     if ~yr
         % Early exit for flat data
         shape = nan;

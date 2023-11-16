@@ -54,7 +54,7 @@
 %   gmaFit, isEegStruct, GmaResults, GmaResults.addEegInfo
 
 %% Attribution
-%	Last author: Olaf C. Schmidtmann, last edit: 27.06.2023
+%	Last author: Olaf C. Schmidtmann, last edit: 15.11.2023
 %   Code adapted from the original version by André Mattes and Kilian Kummer.
 %   Source: https://github.com/0xlevel/gma
 %	MATLAB version: 2023a
@@ -91,7 +91,6 @@ function [results, x0, argsUsed] = gmaFitEeg(EEG, chIdx, winStart, winLength, ar
         args.costFn
         args.psType
         args.psMaxIt
-        args.psRespectWin
         args.xtol
         args.ftol
     end

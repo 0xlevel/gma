@@ -11,7 +11,7 @@
 %
 %   With default parameters, the function returns open and closed intervals.
 %   Closed intervals are nonnegative values of y, enclosed by negative values.
-%   As a special case, a vector of only nonnegative values, will be searched for
+%   As a special case, a vector of only nonnegative values will be searched for
 %   positive intervals, enclosed by zero values, if srcPositive is set to true.
 %   A vector of identical nonnegative values will always be treated as a single
 %   open interval.
@@ -26,9 +26,9 @@
 %               x-intercepts (see srcPositive for pure nonnegative data).
 %   srcPositive - [logical] true = (default) Allows to search for positive
 %               intervals, in case all values in y are nonnegative.
-%               If set to false, vector of nonnegative values will yield the
-%               whole vector as interval, if inclOpen is tue or no interval, if
-%               inclOpen is false.
+%               If set to false, a vector of nonnegative values will yield the
+%               whole vector as interval, if inclOpen is true; or no interval, 
+%               if inclOpen is false.
 %
 %% Output
 %   iv          - [numerical {integer}] start and end indices (rows) for each
@@ -67,10 +67,6 @@
 %   but WITHOUT ANY WARRANTY; without even the implied warranty of
 %   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 %   GNU General Public License for more details.
-
-%% Todo
-%   - Refactor: extract search inside positive values and abstract both search
-%     types
 
 function [iv, closed] = nnegIntervals(y, inclOpen, srcPositive)
 
