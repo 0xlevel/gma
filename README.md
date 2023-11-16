@@ -13,7 +13,7 @@ GMA was developed in the [Department of Individual Differences and Psychological
 
 ## Installation
 
-The source code can simply be downoaded and executed or placed a MATLAB project’s source folder.
+The source code can simply be downoaded (see [latest release](https://github.com/0xlevel/gma/releases/latest)) and run in MATLAB.
 To benefit from future updates in your MATLAB project, you may add it directly as (git) submodule in MATLAB.
 
 ## Usage
