@@ -1,5 +1,5 @@
 # gma – Gamma Model Analysis for MATLAB
-![gma_example](https://github.com/0xlevel/gma/assets/4135987/10d6bae5-537b-4e4c-bb5f-34c74755b822)
+![gma_example](https://github.com/0xlevel/gma/assets/4135987/103e2d8e-a4c4-470b-9446-8b3bd2f52810)
 
 ## Purpose
 Gamma Model Analysis for MATLAB is a set of functions to investigate empirical event-related potential (ERP) components by fitting a Gamma PDF on EEG data. The results provide specific shape-related and time-related parameters of an ERP component. GMA was originally developed by Kummer et al. (2020) and has been further improved since.
