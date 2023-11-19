@@ -18,7 +18,7 @@ To benefit from future updates in your MATLAB project, you may add it directly a
 
 ## Usage
 
-Examples are provided as MATLAB live code (see `examples/`) and all major functions .
+Examples are provided as MATLAB live code (see `examples/`) and the help texts of all major functions .
 
 ``` matlab
 % To run the GMA on EEG data in channel 15, looking for a positive component:
