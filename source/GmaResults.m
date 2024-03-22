@@ -9,12 +9,12 @@
 %% Description
 %   GmaResults extends the <a href="matlab:help('GammaDist')">GammaDist</a> class to hold the results of gmaFit
 %   and the fitted data.
-%   As its superclass <a href="matlab:help('GammaDist')">GammaDist</a>, it is a copyable handle class, which
+%   Like its superclass <a href="matlab:help('GammaDist')">GammaDist</a>, it is a copyable handle class, which
 %   encapsulates the Gamma parameters and the results of <a href="matlab:help('gmaFit')">gmaFit</a> with various
 %   error and correlation measures, as well as utility methods for unit
 %   conversions and plotting.
 %
-%   As GmaResults encapsulates the results of the fit, the settings can be
+%   Since GmaResults encapsulates the results of the fit, the settings can be
 %   altered post-hoc (e.g., changing the premitted mode window). A fit of a
 %   segment within the data (seg property) can also be related to the whole data
 %   or re-fitted (using  <a href="matlab:help('GmaResults.relateWhole')">relateWhole</a> or <a href="matlab:help('GmaResults.fullRefit')">fullRefit</a>). Doing so will reference the
@@ -37,8 +37,10 @@
 %% GmaResults Properties
 %   data        - [double] Data vector used for the fit
 %   eegInfo     - [struct] [read-only] Additional information about the EEG data
-%   isInverted  - [logical] true indicates reversed polarity of the data
-%   minCorr     - [double] Minimal correlation between data and the PDF
+%   isInverted  - [logical] true indicates that the data's polarity was reversed 
+%               before entering the GMA (to fit a negative curve).
+%   minCorr     - [double] Minimum correlation between data and the PDF. Must be
+%               positive ((2^-52 - 1).
 %   seg         - [double] The fitted segment in data (start, end)
 %   win         - [double] The window for successful fitting modes (start, end)
 %
@@ -78,7 +80,7 @@
 %   <a href="matlab:help('GmaResults.disp')">disp</a>            - Custom display.
 %   <a href="matlab:help('GmaResults.asStruct')">asStruct</a>	    - [struct] Return a struct with the main result data.
 %   <a href="matlab:help('GmaResults.asTable')">asTable</a>		    - [table] Return a table with the main results.
-%   <a href="matlab:help('GmaResults.resultStr')">resultStr</a>	    - [string]  Get results as string array.
+%   <a href="matlab:help('GmaResults.resultStr')">resultStr</a>	    - [string]  Results as string array.
 %   <a href="matlab:help('GmaResults.dump')">dump</a>	        - Display verbose results in command window.
 %
 %   Changing Fitting Scope:
@@ -86,8 +88,8 @@
 %   <a href="matlab:help('GmaResults.relateWhole')">relateWhole</a>	    - [GmaResults] Relate fitted PDF to the full data range
 %
 %   Plotting Helpers:
-%   <a href="matlab:help('GmaResults.getTailFront')">getTailFront</a>    - [double] Get the part of the PDF before the fitted segment
-%   <a href="matlab:help('GmaResults.getTailRear')">getTailRear</a>     - [double] Get the part of the PDF after the fitted segment
+%   <a href="matlab:help('GmaResults.getTailFront')">getTailFront</a>    - [double] The part of the PDF before the fitted segment
+%   <a href="matlab:help('GmaResults.getTailRear')">getTailRear</a>     - [double] The part of the PDF after the fitted segment
 %
 %   Protected:
 %   <a href="matlab:help('GmaResults.invalidate')">invalidate</a>      - Resets properties dependent on y and data.
@@ -103,20 +105,21 @@
 %
 %   Inherited Methods from <a href="matlab:help('GammaDist')">GammaDist</a>:
 %   <a href="matlab:help('GammaDist.isValidPdf')">isValidPdf</a>  - [logical] True, if the Gamma PDF parameters are positive.
-%   <a href="matlab:help('GmaResults.iqr')">iqr</a>         - [double] Get the PDF interquartile range (x) using gaminv.
+%   <a href="matlab:help('GmaResults.iqr')">iqr</a>         - [double] The PDF interquartile range (x) using gaminv.
 %
-%   Overridden Time-dependent Parameters, adjusted to the full data epoch:
-%   <a href="matlab:help('GmaResults.ip1')">ip1</a>         - [double] Get the first local inflection point of the PDF.
-%   <a href="matlab:help('GmaResults.ip2')">ip2</a>         - [double] Get the second local inflection point of the PDF.
-%   <a href="matlab:help('GmaResults.mean')">mean</a>        - [double] Get the expected local mean (x) of the PDF.
-%   <a href="matlab:help('GmaResults.median')">median</a>      - [double] Get the expected local median (x) of the PDF.
-%   <a href="matlab:help('GmaResults.mode')">mode</a>        - [double] Get the expected local mode of the PDF.
+%   Overridden time-dependent parameters, adjusted to the full data epoch:
+%   <a href="matlab:help('GmaResults.ip1')">ip1</a>         - [double] The first local inflection point of the PDF.
+%   <a href="matlab:help('GmaResults.ip2')">ip2</a>         - [double] The second local inflection point of the PDF.
+%   <a href="matlab:help('GmaResults.mean')">mean</a>        - [double] The expected local mean of the PDF.
+%   <a href="matlab:help('GmaResults.median')">median</a>      - [double] The expected local median of the PDF.
+%   <a href="matlab:help('GmaResults.mode')">mode</a>        - [double] The expected local mode of the PDF.
+%   <a href="matlab:help('GmaResults.mode')">quantile</a>    - [double] The expected local quantile(s) of the PDF.
 %
-%   Shape-dependent Parameters of the distribution:
-%   <a href="matlab:help('GammaDist.excess')">excess</a>      - [double] Get the excess of the PDF
-%   <a href="matlab:help('GammaDist.skew')">skew</a>        - [double] Get the skewness of the PDF
+%   Inherited shape-dependent parameters of the distribution:
+%   <a href="matlab:help('GammaDist.excess')">excess</a>      - [double] The excess of the PDF
+%   <a href="matlab:help('GammaDist.skew')">skew</a>        - [double] The skewness of the PDF
 %
-%   <a href="matlab:help('GammaDist.var')">var</a>         - [double] Get the variance of the PDF (expected deviation)
+%   <a href="matlab:help('GammaDist.var')">var</a>         - [double] The expected deviation (variance) of the PDF.
 %
 %   Inherited Methods of <a href="matlab:help('handle')">handle</a>
 %   Inherited Methods of <a href="matlab:help('matlab.mixin.Copyable')">Copyable</a>
@@ -125,12 +128,12 @@
 %   GammaDist, gmaFit
 
 %% Attribution
-%	Last author: Olaf C. Schmidtmann, last edit: 15.11.2023
+%	Last author: Olaf C. Schmidtmann, last edit: 01.03.2024
 %   Code adapted from the original version by André Mattes and Kilian Kummer.
 %   Source: https://github.com/0xlevel/gma
-%	MATLAB version: 2023a
+%	MATLAB version: 2023b
 %
-%	Copyright (c) 2023, Olaf C. Schmidtmann, University of Cologne
+%	Copyright (c) 2024, Olaf C. Schmidtmann, University of Cologne
 %   This program is free software: you can redistribute it and/or modify
 %   it under the terms of the GNU General Public License as published by
 %   the Free Software Foundation, either version 3 of the License, or
@@ -206,9 +209,9 @@ classdef GmaResults < GammaDist
 
     properties (Constant)
         % Version number (Major.Minor.Patch) of GmaResults.
-        REL_VERSION = '0.9.5';
+        REL_VERSION = '0.9.6';
         % Release date of this version (yyyy-mm-dd)
-        REL_DATE = '2023-11-16';
+        REL_DATE = '2024-03-01';
         % Identificator for the type field in the info struct.
         EEG_INFO_TYPE = 'GmaInfo';
         % Minium points for segments (especially for correlations)
@@ -368,10 +371,6 @@ classdef GmaResults < GammaDist
             %   to their absolute position within the full data range.
             %   These values can differ, if the PDF was created using
             %   zero-padding beyond the first data point.
-            %   Example: when the segment starts at index 1 of the data, but
-            %   the PDF had been fitted to data, preceded by 20 zero values,
-            %   then seg = 1, x =
-            %
             %
             % Output
             %   offset  - [double {integer}] seg(1) - x(1), which is integer or
@@ -881,6 +880,35 @@ classdef GmaResults < GammaDist
             x = median@GammaDist(obj) + obj.localOffset;
         end
 
+        function x = quantile(obj, p)
+            %QUANTILE Expected quantiles of the PDF
+            %
+            % Description
+            %   [Overridden] <a href="matlab:help('GammaDist.median')">GammaDist.quantile</a>
+
+            %   To get the expected value of the quantiles at (x) of the scaled 
+            %   PDF from a GmaResults instance gg:
+            %       qGam = gammaPdf(gg.quantile, gg.shape, gg.rate) * gg.yscale;
+            %
+            % Requirements
+            %   Statistics and Machine Learning Toolbox (displays a warning if
+            %   not found).
+            %
+            % Input
+            %   p       - [double] Vector probability values for the ICDF, with 
+            %           elements in range [0, 1].
+            %
+            % Output
+            %   x       - [double] Expected quantiles x of the PDF.
+            %           NaN for shape <= 2 or invalid PDF or when the Statistics
+            %           and Machine Learning Toolbox has not been found.
+            %
+            % See also
+            %   GammaDist.quantile, gaminv
+
+            x = quantile@GammaDist(obj, p) + obj.localOffset;
+        end
+
         %% Pseudo-"dependent" Getters
         % Not really dependent getters (slow in MATLAB).
         % Return values are stored in a private variable for lazy access (i.e.,
@@ -912,12 +940,12 @@ classdef GmaResults < GammaDist
             %   rmat    - [numeric] 2-by-2 matrix with the correlation
             %           coefficients along the off-diagonal.
             %   pmat    - [numeric] Matrix of p-values.
-            %   rlo     - [numeric] Matrix of the 95% confidence interval lower
-            %           bound for the corresponding coefficient in R. Use alpha
-            %           to set the confidence level.
-            %   rlo     - [numeric] Matrix of the 95% confidence interval upper
-            %           bound for the corresponding coefficient in R. Use alpha
-            %           to set the confidence level.
+            %   rlo     - [numeric] Matrix of the alpha confidence interval 
+            %           lower bound for the corresponding coefficient in R. Use 
+            %           alpha to set the confidence level.
+            %   rlo     - [numeric] Matrix of the alpha confidence interval 
+            %           upper bound for the corresponding coefficient in R. Use 
+            %           alpha to set the confidence level.
             %
             % See also
             %   corrcoef
@@ -1065,7 +1093,6 @@ classdef GmaResults < GammaDist
             %             distribution function (gaminv).
             %             Requires the Statistics and Machine Learning Toolbox
             %             (displays a warning if not found).
-            %
             %   'dist':   NRMSE is calculated without the RMSE, as the Euclidean
             %             distance of the Gamma PDF and the data points divided
             %             by the Euclidean distance of the data points to their

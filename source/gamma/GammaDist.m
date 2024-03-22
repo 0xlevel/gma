@@ -65,6 +65,7 @@
 %   <a href="matlab:help('GammaDist.mean')">mean</a>        - [double] Get the expected mean (x) of the PDF
 %   <a href="matlab:help('GammaDist.median')">median</a>      - [double] Get the expected median (x) of the PDF using gaminv.
 %   <a href="matlab:help('GammaDist.mode')">mode</a>        - [double] Get the expected mode of the PDF.
+%   <a href="matlab:help('GammaDist.quantile')">quantile</a>    - [double] Get the expected quantile (x) of the PDF using gaminv.
 %
 %   Shape-dependent Parameters:
 %   <a href="matlab:help('GammaDist.excess')">excess</a>      - [double] Get the excess of the PDF
@@ -77,19 +78,19 @@
 %
 %% Requirements:
 %   The Statistics and Machine Learning Toolbox (ST) is currently required for
-%   the methods median and iqr, which rely on the gaminv function. They will
-%   throw a warning and return NaN, if ST is not present.
+%   the methods median, iqr and quantile which rely on the gaminv function. They 
+%   will throw a warning and return NaN, if ST is not present.
 %
 %% See also
-%   gammaPDF, handle, matlab.mixin.Copyable, GmaResults
+%   gammaPDF, handle, matlab.mixin.Copyable, GmaResults, gaminv
 
 %% Attribution
-%	Last author: Olaf C. Schmidtmann, last edit: 27.06.2023
+%	Last author: Olaf C. Schmidtmann, last edit: 01.03.2024
 %   Code adapted from the original version by André Mattes and Kilian Kummer.
 %   Source: https://github.com/0xlevel/gma
-%	MATLAB version: 2023a
+%	MATLAB version: 2023b
 %
-%	Copyright (c) 2023, Olaf C. Schmidtmann, University of Cologne
+%	Copyright (c) 2024, Olaf C. Schmidtmann, University of Cologne
 %   This program is free software: you can redistribute it and/or modify
 %   it under the terms of the GNU General Public License as published by
 %   the Free Software Foundation, either version 3 of the License, or
@@ -481,6 +482,46 @@ classdef GammaDist < matlab.mixin.Copyable
                             "Statistics and Machine Learning Toolbox to run.");
                     end
                     iqr = NaN;
+                end
+            end
+        end
+
+        function x = quantile(obj, p)
+            %QUANTILE Expected quantiles of the PDF using the Gamma inverse
+            % cumulative distribution function (gaminv)
+            %
+            % Description
+            %   To get the expected value of the quantiles at (x) of the scaled 
+            %   PDF from a GammaDist instance gg:
+            %       qGam = gammaPdf(gg.quantile, gg.shape, gg.rate) * gg.yscale;
+            %
+            % Requirements
+            %   Statistics and Machine Learning Toolbox (displays a warning if
+            %   not found).
+            %
+            % Input
+            %   p       - [double] Vector probability values for the ICDF, with 
+            %           elements in range [0, 1].
+            %
+            % Output
+            %   x       - [double] Expected quantiles x of the PDF.
+            %           NaN for shape <= 2 or invalid PDF or when the Statistics
+            %           and Machine Learning Toolbox has not been found.
+            %
+            % See also
+            %   gaminv
+
+            if ~isValidPdf(obj)
+                x = NaN;
+            else
+                try
+                    x = gaminv(p, obj.shape, obj.scale);
+                catch
+                    if ~matlab.addons.isAddonEnabled("ST")
+                        warning("[GammaDist.median] requires gaminv from the " + ...
+                            "Statistics and Machine Learning Toolbox to run.");
+                    end
+                    x = NaN;
                 end
             end
         end

@@ -14,28 +14,33 @@
 %   (GRNMA).
 %
 %   GMA was developed by Kummer et al. (2020) to investigate empirical
-%   event-related potential (ERP) components, by fitting a Gamma PDF on the EEG
+%   event-related potential (ERP) components by fitting a Gamma PDF on the EEG
 %   data. The results provide specific shape-related and time-related parameters
 %   of an ERP component.
 %
 %   This function works in multiple steps, given a data vector and time window
 %   for a valid mode of a potential PDF, which could be fitted on it.
 %   The default steps run as follows if each is successful:
-%   1.  Find a nonnegative interval (NNI) with thw largest area under the curve
-%       and a minimum length 20 data points (see <a href="matlab:help('nnegIntervals')">nnegIntervals</a>), which intersects
-%       the time window with at least 50% of its width.
-%   2.  Add zeros before the first point of the NNI up to the first index in
-%       the data (e.g. for an NNI of [10, 55] nine zeros would be inserted).
-%   3.  The parameters of a Gamma PDF will be estimated for the zero padded
-%       NNI, using close-form estimation (Ye & Chen, 2017, see <a href="matlab:help('presearch_closeform')">presearch_closeform</a>).
-%       The PDF mode must be within the time window.
-%   4.  This initial fit will be optimized, using the Grid Restrained
-%       Nelder-Mead Algorithm (Bűrmen et al., 2006, see <a href="matlab:help('grnma')">grnma</a>).
-%   5.  The resulting (or any unsuccessful) fit will be returned as an instance
-%       of the <a href="matlab:help('GmaResults')">GmaResults</a> class, which allows to access various parameters and
-%       error measures. A successfully optimized fit, has real number
-%       parameters, a mode inside the time window and correlates positively with
-%       the data.
+%   1.  Find the nonnegative interval (NNI) in the data with the largest area 
+%       under the curve and a minimum length of data points (default: 20), 
+%       which intersects the time window with at least 50% of its width 
+%       (see <a href="matlab:help('nnegIntervals')">nnegIntervals</a>).
+%   2.  Add zeros before the first point of the selected NNI up to the first 
+%       index in the data or even beyond the data limit, if explicitly selected.
+%   3.  Estimate the parameters of a Gamma PDF for the zero-padded NNI, using 
+%       close-form estimation (Ye & Chen, 2017; see <a href="matlab:help('presearch_closeform')">presearch_closeform</a>) or 
+%       random guesses as pre-search. The estimated PDF's mode must be within 
+%       the time window.
+%   4.  Optimize the initial fit using the Grid Restrained Nelder-Mead Algorithm 
+%       (Bűrmen et al., 2006; see <a href="matlab:help('grnma')">grnma</a>) until the difference 
+%       falls below a minimum tolerance of differences or the objective function 
+%       (both 1e-8) or if the maximum amount of iterations is exceeded. 
+%       The optimization's cost function is mean-square-error based, but can be 
+%       set otherwise, if desired. 
+%   5.  Return the resulting fit as an instance of as the <a href="matlab:help('GmaResults')">GmaResults</a> class, which 
+%       allows to access various parameters and error measures. A successfully 
+%       optimized fit, has real number Gamma parameters, a mode inside the time 
+%       window and at least correlates positively with the data.
 %
 %   Notes:
 %   The zero-padding of the PDF enhances the fit of data components, which are
@@ -84,14 +89,14 @@
 %
 %   [Optional] Name-value parameters
 %   invData         - [logical] true: indicates that the data' polarity was
-%                   inverted (data * -1) before entering this function;
+%                   reversed (data * -1) before entering this function;
 %                   false (default): the data passed was not inverted.
 %                   This flag is purely informative, included in the results.
-%   optimizeFull    - [logical] Sets the scope ot the GRNMA optmization to
+%   optimizeFull    - [logical] Sets the scope of the GRNMA optmization to
 %                   either the largest nonnegative interval with false (default)
 %                   or the full data with true.
-%   segMinLength    - [uint32] The minimum amount of consecutive nonnegative
-%                   data points in the data. Default: 20 (data points).
+%   segMinLength    - [uint32] The minimum required consecutive nonnegative
+%                   data points  . Default: 20 (data points).
 %                   If no nonnegative intervals were found, the function exits
 %                   early and does not try to fit a PDF. The close-form
 %                   pre-search performs less reliable below 20 and cannot
@@ -108,16 +113,6 @@
 %   maxSrcIt        - [numeric {integer}] Maximum iterations for the
 %                   optimization function (here the Grid-restrained Nelder-Mead
 %                   algorithm). (default = 1000)
-%   logEnabled      - [logical] true (default): without another costFn set, logs
-%                   messages to the command window (via fprintf()), false:
-%                   disables output (using a NOP function).
-%   logSrc          - [logical] true = logs the GRNMA search step messages in
-%                   detail (which is a lot!); false (default) does not log any
-%                   search messages, saving system ressources.
-%   logFn           - [function handle] Any function taking a format
-%                   specification (as in sprintf) and a variable amount of text
-%                   arguments (varargin), which should be used for logging.
-%                   A valid function handle sets logEnabled to true.
 %   costFn          - [function handle] A cost function wrapping any objective
 %                   function, used to determine the cost (e.g. the MSE) of a
 %                   solution during the optimization. Default: @meeseeks (MSE
@@ -129,7 +124,7 @@
 %                   'closeform' (default): uses closed-form estimation, the
 %                   fastest and the recommended method, resulting in the best
 %                   guesses for most data.
-%                   'random': uses random integers for shape, rate and scaling
+%                   'random': uses random numbers for shape, rate and scaling
 %                   to find the lowest cost for a parameter set with a PDF with
 %                   the search window.
 %   psMaxIt         - [numeric {integer}] Maximum iterations for the pre-search
@@ -143,10 +138,19 @@
 %   ftol            - [double] lower boundary of the absolute tolerance of value
 %                   differences for the objective function. For more details,
 %                   please consult the <a href="matlab:help('grnma')">grnma</a> help. (default = 1e-8)
+%   logEnabled      - [logical] true (default): without another costFn set, logs
+%                   messages to the command window (via fprintf()), false:
+%                   disables output (using a NOP function).
+%   logSrc          - [logical] true = logs the GRNMA search step messages in
+%                   detail (which is a lot!); false (default) does not log any
+%                   search messages, saving system ressources.
+%   logFn           - [function handle] Any function taking a format
+%                   specification (as in sprintf) and a variable amount of text
+%                   arguments (varargin), which should be used for logging.
+%                   A valid function handle sets logEnabled to true.
 %
 %% Output
-%   result      - [<a href="matlab:help('GmaResults')">GmaResults</a>] Instance
-%               containing the optimized results.
+%   result      - [<a href="matlab:help('GmaResults')">GmaResults</a>] Instance containing the optimized results.
 %   x0          - [double] parameters of the initial guess by the presearch as
 %               shape, rate and y-scaling values in a vector.
 %
@@ -354,7 +358,7 @@ function [result, x0, argsUsed] = gmaFit(data, winStart, winLength, args)
 
     %% Results
     % Create instance containing the fitted Gamma PDF and the results for the
-    % orignal (unpadded) segment.
+    % original (unpadded) segment.
     result = GmaResults(gFit(1), gFit(2), gFit(3), data, ...
         gX, seg = x0seg, win = mWin, ...
         isInverted = args.invData, isFullOpt = args.optimizeFull);
