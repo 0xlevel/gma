@@ -1,5 +1,5 @@
 # gma – Gamma Model Analysis for MATLAB
-![gma_example](https://github.com/0xlevel/gma/assets/4135987/10d6bae5-537b-4e4c-bb5f-34c74755b822)
+![gma_example](https://github.com/0xlevel/gma/assets/4135987/103e2d8e-a4c4-470b-9446-8b3bd2f52810)
 
 ## Purpose
 Gamma Model Analysis for MATLAB is a set of functions to investigate empirical event-related potential (ERP) components by fitting a Gamma PDF on EEG data. The results provide specific shape-related and time-related parameters of an ERP component. GMA was originally developed by Kummer et al. (2020) and has been further improved since.
@@ -7,18 +7,18 @@ GMA was developed in the [Department of Individual Differences and Psychological
 
 ## Prerequisites
 
-- **MATLAB** (R2023a; likely supported from R2017a or higher)
-- _(optional)_ Statistics and Machine Learning Toolbox to obtain median and iqr, which rely on the gaminv function.
+- **MATLAB** (R2023a (v9.14); likely supported by R2017a or higher)
+- _(optional)_ Statistics and Machine Learning Toolbox (built with v12.5) to obtain median and iqr, which rely on the gaminv function.
 - _(recommended)_ EEGLAB Toolbox to (pre-)process and structure EEG data
 
 ## Installation
 
-The source code can simply be downoaded and executed or placed a MATLAB project’s source folder.
+The source code can simply be downloaded (see [latest release](https://github.com/0xlevel/gma/releases/latest)) and run in MATLAB.
 To benefit from future updates in your MATLAB project, you may add it directly as (git) submodule in MATLAB.
 
 ## Usage
 
-Examples are provided as MATLAB live code (see `examples/`) and all major functions .
+Examples are provided as MATLAB live code (see `examples/`) and the help texts of all major functions .
 
 ``` matlab
 % To run the GMA on EEG data in channel 15, looking for a positive component:
