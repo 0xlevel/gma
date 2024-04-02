@@ -531,7 +531,6 @@ classdef GmaResults < GammaDist
 
                 info.filename = EEG.filename;
                 info.filepath = EEG.filepath;
-                info.xmin = EEG.xmin;
 
                 % Membership info of the dataset:
                 info.subject = EEG.subject;
